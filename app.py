@@ -6,15 +6,20 @@ Created on Thu Apr 17 23:30:08 2025
 """
 
 import gradio as gr
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import pipeline
 
-tokenizer = AutoTokenizer.from_pretrained("TheBloke/MelloGPT-AWQ")
-model = AutoModelForCausalLM.from_pretrained("TheBloke/MelloGPT-AWQ")
+# Load the model from Hugging Face Hub
+model_name = "TheBloke/MelloGPT-AWQ"  # This is the model you're using.
+generator = pipeline('text-generation', model=model_name)
 
 def generate_response(prompt):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(**inputs, max_new_tokens=150)
-    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return generator(prompt, max_length=100, num_return_sequences=1)[0]['generated_text']
 
-iface = gr.Interface(fn=generate_response, inputs="text", outputs="text")
+# Create a Gradio interface for user interaction
+iface = gr.Interface(fn=generate_response, 
+                     inputs="text", 
+                     outputs="text", 
+                     title="MelloGPT for Mental Health")
+
+# Launch the interface
 iface.launch()
